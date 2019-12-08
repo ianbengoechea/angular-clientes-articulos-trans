@@ -1,0 +1,35 @@
+.btn-margin {
+    margin: 5px;
+    width: 200px;
+}
+
+.dialogTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mat-toolbar {
+    margin: -24px;
+    margin-bottom: 0;
+    width: auto;
+}
+
+.mat-dialog-content {
+    margin: 0 -24px;
+    padding: 0 !important;
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+    width: auto !important;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.footer-div-modal {
+    display: flex;
+    justify-content: space-around;
+}

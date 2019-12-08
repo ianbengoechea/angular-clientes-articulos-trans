@@ -1,0 +1,28 @@
+<form [formGroup]="ventasForm">
+    <ng-container [formGroupName]="cliente">
+        <h2 formControlName=" empresa ">Vedido a: {{ ventasForm.controls['cliente'].controls['empresa'].value }}</h2>
+    </ng-container>
+
+    <p formControlName="fecha_venta ">fecha de venta: {{ ventasForm.controls['fecha_venta'].value | date:"dd/MM/yyyy " }}</p>
+
+    <ng-container formArrayName="ventas_items ">
+
+        <div *ngFor="let task of ventasForm.controls[ 'ventas_items'].controls; let i=i ndex " [formGroupName]="i ">
+            <p formControlName="precio_unitario " class="form-control form-control-sm " type="text ">
+                precio unitario: {{ ventasForm.controls['ventas_items'].controls[i].controls['articulo'].value.precio_unitario | currency }}
+            </p>
+            <p formControlName="cantidad " class="form-control form-control-sm " type="text ">
+                cantidad vendida: {{ ventasForm.controls['ventas_items'].controls[i].controls.cantidad.value }}
+            </p>
+            <p formControlName="total " class="form-control form-control-sm " type="text ">
+                total de venta: {{ ventasForm.controls['ventas_items'].controls[i].controls.total.value | currency }}
+            </p>
+            <p>
+                {{ ventasForm.controls['ventas_items'].controls[i].controls.value | json }}
+            </p>
+        </div>
+
+    </ng-container>
+
+    <button md-button type="button ">Cancelar</button>
+</form>

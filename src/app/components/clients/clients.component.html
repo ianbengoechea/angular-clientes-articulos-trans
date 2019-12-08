@@ -1,0 +1,68 @@
+<div class="container center">
+
+    <div class="up-table-content">
+
+        <div style="width: 350px;">
+            <mat-form-field>
+                <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Busqueda">
+            </mat-form-field>
+        </div>
+        <div>
+            <button mat-raised-button (click)="clientNew()"> Nuevo cliente</button>
+        </div>
+
+
+    </div>
+
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+        <!-- Position Column -->
+        <ng-container matColumnDef="id_cliente">
+            <th mat-header-cell *matHeaderCellDef> Id </th>
+            <td mat-cell *matCellDef="let element"> {{ element.id_cliente }} </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let element"> {{ element.firstname }} {{ element.lastname }}</td>
+        </ng-container>
+
+        <!-- Weight Column -->
+        <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let element"> {{ element.email }}</td>
+        </ng-container>
+
+        <!-- Symbol Column -->
+        <ng-container matColumnDef="telephone">
+            <th mat-header-cell *matHeaderCellDef> Telefono </th>
+            <td mat-cell *matCellDef="let element"> {{ element.telephone }}</td>
+        </ng-container>
+
+        <!-- Symbol Column -->
+        <ng-container matColumnDef="empresa">
+            <th mat-header-cell *matHeaderCellDef> Empresa </th>
+            <td mat-cell *matCellDef="let element"> {{ element.empresa.nombre }}</td>
+        </ng-container>
+
+        <!-- options column -->
+        <ng-container matColumnDef="opciones">
+            <th mat-header-cell *matHeaderCellDef> Opciones </th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-icon-button (click)="clientDelete(element['id_cliente'])">
+                    <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-icon-button (click)="clientEdit(element)">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="clientView(element)">
+                        <mat-icon>remove_red_eye</mat-icon>
+                    </button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>

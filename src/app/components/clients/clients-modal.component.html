@@ -1,0 +1,80 @@
+<ng-container *ngIf="!this.data.id_cliente && !viewMode; else editar">
+    <h2 mat-dialog-title>NUEVO CLIENTE</h2>
+    <br>
+</ng-container>
+
+<ng-template #editar>
+    <ng-container *ngIf="this.data.id_cliente && !viewMode; else ver">
+        <h2 mat-dialog-title>EDITAR CLIENTE</h2>
+        <br>
+    </ng-container>
+</ng-template>
+
+<ng-template #ver>
+    <h2 mat-dialog-title>VER CLIENTE</h2>
+    <br>
+</ng-template>
+
+<mat-dialog-content>
+    <form class="example-form" [formGroup]="form">
+
+        <table cellspacing="20">
+            <tr>
+                <td>
+                    <mat-form-field>
+                        <input formControlName="firstname" matInput placeholder="Nombre">
+                    </mat-form-field>
+
+                </td>
+
+                <td>
+                    <mat-form-field>
+                        <input formControlName="lastname" matInput placeholder="Apellido">
+                    </mat-form-field>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <mat-form-field>
+                        <input formControlName="country" matInput placeholder="Pais">
+                    </mat-form-field>
+                </td>
+                <td>
+                    <mat-form-field>
+                        <input formControlName="email" matInput placeholder="Email ">
+                        <mat-hint align="end">hola..</mat-hint>
+                    </mat-form-field>
+                </td>
+            </tr>
+
+            <tr>
+
+                <td>
+                    <mat-form-field>
+                        <input type="tel" formControlName="telephone" matInput placeholder="Telefono">
+                    </mat-form-field>
+                </td>
+
+            </tr>
+            <tr>
+                <td>
+
+                    <mat-label>Empresa</mat-label>
+                    <mat-select formGroupName="empresa" [formControl]="id_empresa" [(value)]="this.data.empresa['id_empresa']">
+                        <mat-option *ngFor="let empresa of listaEmpresas" [value]="empresa.id_empresa">
+                            {{empresa.nombre}}
+                        </mat-option>
+                    </mat-select>
+
+                </td>
+            </tr>
+        </table>
+
+        <div class="footer-div-modal">
+            <button (click)="onNoClick()" class="btn-margin" mat-raised-button color="primary">CANCELAR</button>
+            <button *ngIf="!viewMode" (click)="guardarCambios()" class="btn-margin" mat-raised-button color="primary">ACEPTAR</button>
+        </div>
+
+    </form>
+</mat-dialog-content>

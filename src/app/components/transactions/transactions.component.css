@@ -1,0 +1,28 @@
+table {
+    width: 80%;
+    margin: 15px auto;
+}
+
+button {
+    margin: 16px 8px;
+}
+
+.center {
+    justify-content: center;
+}
+
+.up-table-content {
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.mat-form-field {
+    font-size: 14px;
+    width: 40%;
+}
+
+.date-picker-form-field {
+    width: 200px;
+}
