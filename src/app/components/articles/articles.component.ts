@@ -9,6 +9,7 @@ import { ArticlesService } from '../../providers/articles/articles.service';
 
 // components
 import { ArticlesModalComponent } from './articles-modal.component';
+import Swal from 'sweetalert2';
 
 export interface Categoria {
   categoria: {
@@ -36,12 +37,12 @@ export class ArticlesComponent implements OnInit {
   dataSource: any = [];
 
   constructor(
-              private ArticlesService: ArticlesService,
+              private articlesService: ArticlesService,
               public dialog: MatDialog ) { }
 
   ngOnInit() {
 
-    this.ArticlesService.getAllArticles()
+    this.articlesService.getAllArticles()
         .subscribe( (articulos: Article[]) => {
           console.log(articulos)
           this.dataSource = new MatTableDataSource(articulos);
@@ -75,9 +76,9 @@ export class ArticlesComponent implements OnInit {
     dialogRef.afterClosed().subscribe( (result: Article) => {
       console.log('[ARTICLE-COMPONENT] >> articleNew', result);
       if (!!result) {
-        this.ArticlesService.createArticle( result )
+        this.articlesService.createArticle( result )
               .subscribe( () => {
-                this.ArticlesService.getAllArticles()
+                this.articlesService.getAllArticles()
                     .subscribe( (article: Article[]) => this.dataSource = new MatTableDataSource(article));
               });
             }
@@ -104,7 +105,7 @@ export class ArticlesComponent implements OnInit {
       console.log('[ARTICLE-COMPONENT] >> articleEdit', result);
 
       if (!!result) {
-      this.ArticlesService.editArticle( result )
+      this.articlesService.editArticle( result )
             .subscribe( (response: any) => {
               console.log(response);
             });
@@ -129,13 +130,42 @@ export class ArticlesComponent implements OnInit {
   articleDelete(id: number) {
 
     if (!!id) {
-      this.ArticlesService.deleteArticle( id )
-            .subscribe( () => {
-              this.ArticlesService.getAllArticles()
-                  .subscribe( (articulo: Article[]) => this.dataSource = new MatTableDataSource(articulo));
-            });
-    }
+      Swal.fire({
+        title: 'Quieres eliminar el articulo?',
+        text: 'No se puede revertir esta accion',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Si, eliminalo!',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        console.log('result.value', result.value)
+        if (result.value) {
+          this.articlesService.deleteArticle( id )
+        .subscribe( () => {
+          this.articlesService.getAllArticles()
+              .subscribe( (articulo: Article[]) => this.dataSource = new MatTableDataSource(articulo));
+          Swal.fire(
+                'Eliminado!',
+                'El articulo ha sido eliminado.',
+                'success'
+              )
+        }, (error) => {
+              if (error.error.message.includes('existe') ) {
+                return Swal.fire(
+                'Error!',
+                'No se puede eliminar el articulo porque existe registrada una venta',
+                'error'
+                );
+              }
+        });
+        } else {
+          return;
+        }
+    });
   }
+}
 
   articleView(object): void {
     const dialogRef = this.dialog.open(ArticlesModalComponent, {

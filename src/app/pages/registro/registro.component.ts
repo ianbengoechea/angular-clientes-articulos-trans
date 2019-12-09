@@ -51,7 +51,7 @@ export class RegistroComponent implements OnInit {
             localStorage.removeItem('email');
          }
 
-          this.router.navigateByUrl('/home');
+          this.router.navigateByUrl('/login');
 
         }, (err) => {
           console.log(err.error.error.message);

@@ -3,7 +3,7 @@
     <div class="up-table-content">
 
         <mat-form-field class="date-picker-form-field">
-            <input matInput [locale]="{format: 'DD-MM-YYYY'}" [(ngModel)]="dateValue" type="text" ngxDaterangepickerMd startKey="start" endKey="end" (change)="onChangeDate($event)">
+            <input placeholder="Filtrar por fecha" matInput [locale]="{format: 'DD-MM-YYYY'}" [(ngModel)]="dateValue" type="text" ngxDaterangepickerMd startKey="start" endKey="end" (change)="onChangeDate($event)">
             <button mat-button *ngIf="dateValue" matSuffix mat-icon-button (click)="getAllTransactions()">
                         <mat-icon>close</mat-icon>
                       </button>

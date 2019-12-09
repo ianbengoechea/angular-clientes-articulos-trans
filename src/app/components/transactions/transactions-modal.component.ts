@@ -43,38 +43,6 @@ export class TransactionsModalComponent implements OnInit {
   ventasForm: FormGroup;
   ventasItems: FormArray;
   dataVentas: Array<any> = this.data['ventas_items'];
-  // id_empresa = new FormControl({ value: this.data.empresa.id_empresa, disabled: this.data['isView'] });
-  // nombre = new FormControl({ value: this.data.empresa.id_empresa, disabled: this.data['isView'] });
-  // viewMode = this.data['isView'];
-
-  // tslint:disable: max-line-length
-  // form = new FormGroup({
-    // nombre: new FormControl({ value: this.data['cliente'].empresa.nombre, disabled: this.data['isView'] }, Validators.required),
-    // telephone: new FormControl({ value: this.data['cliente'].telephone, disabled: this.data['isView']}, Validators.required),
-    // email: new FormControl({ value: this.data['cliente'].email, disabled: this.data['isView']}, Validators.required),
-    // fecha_venta:  new FormControl({ value: this.data['fecha_venta'], disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    // comentario:  new FormControl({ value: this.data['comentarios'], disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    // ventas_items: this.ventasItems
-    // new FormGroup({
-    //   nombre_articulo: new FormControl({ value: this.data['ventas_items'].articulo.nombre , disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    //   precio_unitario: new FormControl({ value: this.data['ventas_items'].articulo.precio_unitario, disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    //   cantidad: new FormControl({ value: this.data['ventas_items'].cantidad, disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    //   total: new FormControl({ value: this.data['ventas_items'].total, disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    // })
-    // empresa: new FormGroup({
-    //     id_empresa: this.id_empresa,
-    //     nombre: this.nombre,
-    // })
-  // });
-
-  // get user() {
-  //   return this.form.get('firstname');
-  // }
-  // get idEmpresa() {
-  //   return this.form.get('empresa.id_empresa');
-  // }
-
-
 
   constructor(
               private fb: FormBuilder,
@@ -87,18 +55,12 @@ export class TransactionsModalComponent implements OnInit {
 
   ngOnInit() {
 
-  //   this.clientesService.getAllTransaction()
-  //       .subscribe( (reporte: any) => {
-  //         console.log('[MODAL-COMPONENT] reporte >>>', reporte);
-  //         this.listaReportes = reporte;
-  //       });
-
   this.createForm();
 
   this.ventasItems = this.getArrayData();
 
   while (this.getArrayData().length) {
-      this.ventasItems.removeAt(0)
+      this.ventasItems.removeAt(0);
     }
 
   for (const data of this.dataVentas) {
@@ -135,20 +97,20 @@ export class TransactionsModalComponent implements OnInit {
       };
     }
     return this.fb.group({
-      id_venta_detalle: data.id_venta_detalle,
-      cantidad: data.cantidad,
-      total: data.total,
-      articulo: {
-        id_articulos: data.articulo.id_articulos,
-        cantidad: data.articulo.cantidad,
-        descripcion: data.articulo.descripcion,
-        nombre: data.articulo.nombre,
-        precio_unitario: data.articulo.precio_unitario,
-        categoria: {
-          id_categoria: data.articulo.categoria.id_categoria,
-          nombre: data.articulo.categoria.nombre
-        }
-      }
+      id_venta_detalle: this.fb.control({ value: data.id_venta_detalle, disabled: this.data['isView'] }),
+      cantidad: this.fb.control({ value: data.cantidad, disabled: this.data['isView'] }),
+      total: this.fb.control({ value: data.total, disabled: this.data['isView'] }),
+      articulo: this.fb.group({
+        id_articulos: this.fb.control({ value: data.articulo.id_articulos, disabled: this.data['isView'] }),
+        cantidad: this.fb.control({ value: data.articulo.cantidad, disabled: this.data['isView'] }),
+        descripcion: this.fb.control({ value: data.articulo.descripcion, disabled: this.data['isView'] }),
+        nombre: this.fb.control({ value: data.articulo.nombre, disabled: this.data['isView'] }),
+        precio_unitario: this.fb.control({ value: data.articulo.precio_unitario, disabled: this.data['isView'] }),
+      }),
+        categoria: this.fb.group ({
+          id_categoria: this.fb.control({ value: data.articulo.categoria.id_categoria, disabled: this.data['isView'] }),
+          nombre: this.fb.control({ value: data.articulo.categoria.nombre, disabled: this.data['isView'] })
+        }),
     });
   }
 
@@ -157,9 +119,7 @@ export class TransactionsModalComponent implements OnInit {
     this.ventasForm = this.fb.group({
       comentarios: this.fb.control({ value: this.data['comentarios'], disabled: this.data['isView']}),
       fecha_venta: this.fb.control({ value: this.data['fecha_venta'], disabled: this.data['isView']}),
-      cliente: this.fb.group({
-        empresa: this.fb.control({ value: this.data['nombre'], disabled: this.data['isView'] })
-      }),
+      empresa: this.fb.control({ value: this.data['nombre'], disabled: this.data['isView'] }),
       ventas_items: this.fb.array([this.buildCusforms({
         id_venta_detalle: null,
         cantidad: null,
@@ -177,7 +137,8 @@ export class TransactionsModalComponent implements OnInit {
         }
       })])
     });
-    console.log('[FORM]', this.ventasForm)
+    console.log('[FORM]', this.ventasForm);
   }
+
 
 }

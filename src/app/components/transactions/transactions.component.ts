@@ -90,7 +90,7 @@ export class TransactionsComponent implements OnInit {
     const dialogRef = this.dialog.open(TransactionsModalComponent, {
       width: 'auto',
       data: {
-        isView: false,
+        isView: true,
         nombre: object['cliente'].empresa.nombre,
         telephone: object['cliente'].telephone,
         email: object['cliente'].email,

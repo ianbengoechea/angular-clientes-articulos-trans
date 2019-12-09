@@ -33,7 +33,9 @@ export class LoginComponent implements OnInit {
 
   login( form: NgForm ) {
 
-    if ( form.invalid ) { return; }
+    if ( form.invalid ) {
+      return;
+    }
 
     Swal.fire({
       allowOutsideClick: false,
