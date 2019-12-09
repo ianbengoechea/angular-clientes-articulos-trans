@@ -18,6 +18,7 @@ export class RegistroComponent implements OnInit {
 
   usuario: UserModel;
   recordarUsuario = false;
+  hide = true;
 
   constructor( private auth: AuthService, private router: Router ) { }
 

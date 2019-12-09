@@ -1,54 +1,44 @@
-<div class="limiter animated fadeInLeft fast">
-    <div class="container-login100">
-        <div class="wrap-login100 p-t-50 p-b-90">
-            <form #f="ngForm" (ngSubmit)="onSubmit( f )" class="login100-form validate-form flex-sb flex-w">
+<div class="main-container" >
+    <form  #f="ngForm" (ngSubmit)="onSubmit( f )">
+      <mat-card >
+          <mat-card-header>
+              <mat-card-title>Crear nueva cuenta</mat-card-title>
+          </mat-card-header>
 
-                <span class="login100-form-title p-b-51">
-                            Crear nueva cuenta
-                        </span>
+          <p class="form-fields">
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput placeholder="ingresa tu email" required [(ngModel)]="usuario.email" name="email">
+                <mat-error *ngIf="f.submitted && f.controls['email'].errors">El correo es obligatorio</mat-error>
+              </mat-form-field>
 
-                <span *ngIf="f.submitted && f.controls['email'].errors" class="text-danger animated fadeInUp">El correo es obligatorio</span>
-                <div class="wrap-input100 m-b-16">
-                    <input required email class="input100" type="email" name="email" [(ngModel)]="usuario.email" placeholder="Email">
+              <mat-form-field appearance="outline">
+                  <mat-label>Nombre</mat-label>
+                  <input matInput placeholder="ingresa tu email" required [(ngModel)]="usuario.nombre" name="nombre">
+                  <mat-error *ngIf="f.submitted && f.controls['nombre'].errors">El nombre es obligatorio</mat-error>
+              </mat-form-field>
 
-                    <span class="focus-input100"></span>
-                </div>
+              <mat-form-field  appearance="outline">
+                  <mat-label>Contraseña</mat-label>
+                  <input matInput placeholder="ingresa tu contraseña" [type]="hide ? 'password' : 'text'" [(ngModel)]="usuario.password"  name="password" required>
+                  <mat-error *ngIf="f.submitted && f.controls['password'].errors">La contraseña debe de ser más de 6 letraso</mat-error>
+                  <button mat-icon-button matSuffix type="button" (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                  <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                  </button>
+                </mat-form-field>
+          </p>
 
-                <span *ngIf="f.submitted && f.controls['nombre'].errors" class="text-danger animated fadeInUp">El nombre es obligatorio</span>
-                <div class="wrap-input100 m-b-16">
-                    <input required minlength="2" class="input100" type="text" name="nombre" placeholder="Nombre y apellido" [(ngModel)]="usuario.nombre">
+          <div>
+              <p>
+                  <mat-checkbox [(ngModel)]="recordarUsuario" name="remember-me">¿Recordar credenciales?</mat-checkbox>
+                  <a mat-button routerLink="/login">¿Ya tienes cuenta? / Ingresar</a>
+              </p>
 
-                    <span class="focus-input100"></span>
-                </div>
+              <div class="example-button-row">
+                  <button mat-flat-button color="primary" type="submit">Crear cuenta</button>
+              </div>
+          </div>
 
-                <span *ngIf="f.submitted && f.controls['password'].errors" class="text-danger animated fadeInUp fast">La contraseña debe de ser más de 6 letras</span>
-                <div class="wrap-input100 m-b-16">
-                    <input required minlength="6" class="input100" type="password" name="password" placeholder="Password" [(ngModel)]="usuario.password">
-                    <span class="focus-input100"></span>
-                </div>
-
-                <div class="flex-sb-m w-full p-t-3 p-b-24">
-                    <div class="contact100-form-checkbox">
-                        <input [(ngModel)]="recordarUsuario" class="input-checkbox100" id="ckb1" type="checkbox" name="remember-me">
-                        <label class="label-checkbox100" for="ckb1">
-                                    Recordar mi usuario
-                                </label>
-                    </div>
-
-                    <div>
-                        <a routerLink="/login" class="txt1">
-                                    ¿Ya tienes cuenta? / Ingresar
-                                </a>
-                    </div>
-                </div>
-
-                <div class="container-login100-form-btn m-t-17">
-                    <button class="login100-form-btn" type="submit">
-                                Crear cuenta
-                            </button>
-                </div>
-
-            </form>
-        </div>
-    </div>
-</div>
+    </mat-card>
+  </form>
+  </div>

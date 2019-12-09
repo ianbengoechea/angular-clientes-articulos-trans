@@ -18,6 +18,7 @@ export class LoginComponent implements OnInit {
 
   usuario = new UserModel();
   recordarUsuario = false;
+  hide = true;
 
   constructor( private auth: AuthService, private router: Router ) { }
 
