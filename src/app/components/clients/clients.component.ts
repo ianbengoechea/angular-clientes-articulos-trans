@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 
 // material components
 import {MatTableDataSource} from '@angular/material/table';
@@ -9,6 +9,11 @@ import { ClientsService } from 'src/app/providers/clients/clients.service';
 
 // components
 import { ClientsModalComponent } from './clients-modal.component';
+
+// NGRX
+import { AppState } from 'src/app/app.reducer';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 
 export interface Empresa {
   empresa?: {
@@ -31,25 +36,32 @@ export interface Cliente extends Empresa {
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.css']
 })
-export class ClientsComponent implements OnInit {
+export class ClientsComponent implements OnInit, OnDestroy {
 
   displayedColumns: string[] = ['id_cliente', 'nombre', 'email', 'empresa', 'telephone', 'opciones'];
   dataSource: any = [];
+  subscription: Subscription;
+  ClientesArray: any = [];
+
 
   constructor(
               private clientesService: ClientsService,
-              public dialog: MatDialog ) { }
+              public dialog: MatDialog,
+              private _store: Store<AppState>) { }
 
   ngOnInit() {
 
-    this.clientesService.getAllClients()
-        .subscribe( (clientes: Cliente[]) => {
-          console.log(clientes)
-          this.dataSource = new MatTableDataSource(clientes);
-          console.log('this.dataSource', this.dataSource);
-        });
+    this.clientesService.loadClientes();
+    this.subscription = this._store.select('clients')
+                          .subscribe( client => this.dataSource = new MatTableDataSource(client.ClientList));
 
   }
+
+  ngOnDestroy() {
+
+    this.subscription.unsubscribe();
+  }
+
 
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();

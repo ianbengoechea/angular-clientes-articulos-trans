@@ -18,14 +18,8 @@ export class AuthService {
   private API_KEY = 'AIzaSyDV55wRDsXFoWGGY6U6D4TJJuhr83mNQ3I';
   userToken: string;
 
-  // crear nuevo usuario
-  // `${this.url}/accounts:signUp?key=[API_KEY]`
 
-  // login
-  // `${this.url}/accounts:signInWithPassword?key=[API_KEY]`
-
-
-  constructor( private http: HttpClient ) {
+  constructor( private http: HttpClient) {
 
     this.leerToken();
   }
@@ -37,10 +31,7 @@ export class AuthService {
   }
 
   login( usuario?: UserModel ): Observable<any> {
-
     const authData = {
-      // email: usuario.email,
-      // password: usuario.password,
       ...usuario,
       returnSecureToken: true
     };
@@ -59,10 +50,7 @@ export class AuthService {
   }
 
   nuevoUsuario( usuario: UserModel ) {
-
     const authData = {
-      // email: usuario.email,
-      // password: usuario.password,
       ...usuario,
       returnSecureToken: true
     };
@@ -119,4 +107,3 @@ export class AuthService {
 
 
 }
-

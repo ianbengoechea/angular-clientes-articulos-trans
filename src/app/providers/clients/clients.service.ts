@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Cliente } from 'src/app/components/clients/clients.component';
 import { Observable } from 'rxjs';
+
+import { Cliente } from 'src/app/components/clients/clients.component';
+
+
+// NGRX
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/app.reducer';
+import { ClientGetAllAction } from 'src/app/components/clients/clients.actions';
 
 
 @Injectable({
@@ -13,14 +20,18 @@ export class ClientsService {
   private httpHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
 
-  constructor(private http: HttpClient) { }
+  constructor( private http: HttpClient,
+               private _store: Store<AppState> ) { }
 
   getAllEmpresa() {
     return this.http.get(`${ this.SERVER }/empresas`);
   }
 
-  getAllClients() {
-    return this.http.get(`${ this.SERVER }/clientes`);
+  loadClientes() {
+    return this.http.get(`${ this.SERVER }/clientes`)
+              .subscribe( (ArrayClientes) => {
+                this._store.dispatch( new ClientGetAllAction( ArrayClientes ) );
+              })
   }
 
   // getClientById() {

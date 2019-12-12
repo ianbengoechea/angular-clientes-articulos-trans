@@ -4,11 +4,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
 // material
 import { MaterialModule } from './material.module';
 // datepicker
 import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 
+// ngrx
+import { StoreModule } from '@ngrx/store';
+import { appReducers } from './app.reducer';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 // components
 import { AppComponent } from './app.component';
@@ -21,6 +26,7 @@ import { TransactionsModalComponent } from './components/transactions/transactio
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 
+import { environment } from '../environments/environment';
 
 @NgModule({
   entryComponents: [
@@ -47,7 +53,12 @@ import { RegistroComponent } from './pages/registro/registro.component';
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
-    NgxDaterangepickerMd.forRoot()
+    NgxDaterangepickerMd.forRoot(),
+    StoreModule.forRoot( appReducers ),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25,
+      logOnly: environment.production,
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
