@@ -7,6 +7,10 @@ import { ArticlesComponent, Article } from '../../components/articles/articles.c
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+// ngrx
+import { Store } from '@ngrx/store';
+import { AppState } from '../../app.reducer';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -16,18 +20,22 @@ export class ArticlesService {
   private httpHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
 
-  constructor(private http: HttpClient) { }
+  constructor(
+              private http: HttpClient,
+              private store: Store<AppState>
+              ) {}
 
-  getAllArticles() {
+  loadArticles() {
     return this.http.get(`${ this.SERVER }/articulos`);
   }
-  getAllCategories() {
-    return this.http.get(`${ this.SERVER }/categorias`);
+
+  loadArticle(id: number) {
+    return this.http.get(`${ this.SERVER }/articulos`);
   }
 
-  // getClientById() {
-
-  // }
+  loadCategories() {
+    return this.http.get(`${ this.SERVER }/categorias`);
+  }
 
   createArticle(article: Article) {
 
@@ -35,11 +43,11 @@ export class ArticlesService {
 
   }
 
-  editArticle(articulo: Article): Observable<any> {
+  editArticle(idArticle: number, articulo: Article): Observable<any> {
     // let params = new HttpParams().set( 'id_cliente', cliente.id_cliente.toString() );
     // cliente.empresa.id_empresa = 2;
     console.log("articulo", articulo);
-    return this.http.put<any>(`${ this.SERVER }/articulos/edit/?id=${articulo.id_articulos}`, articulo, { headers: this.httpHeaders });
+    return this.http.put<any>(`${ this.SERVER }/articulos/edit/?id=${idArticle}`, articulo, { headers: this.httpHeaders });
   }
 
   deleteArticle(id: number) {

@@ -53,10 +53,10 @@
                 <button mat-icon-button (click)="clientDelete(element['id_cliente'])">
                     <mat-icon>delete</mat-icon>
                 </button>
-                <button mat-icon-button (click)="clientEdit(element)">
+                  <button mat-icon-button (click)="loadCliente(element['id_cliente'])">
                     <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button (click)="clientView(element)">
+                <button mat-icon-button (click)="loadCliente(element['id_cliente'], 'VIEW')">
                         <mat-icon>remove_red_eye</mat-icon>
                     </button>
             </td>

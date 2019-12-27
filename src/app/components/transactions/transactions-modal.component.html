@@ -1,4 +1,4 @@
-<div class="main-container">
+<!-- <div class="main-container">
     <form [formGroup]="ventasForm">
 
         <mat-card-header>
@@ -42,4 +42,10 @@
     </form>
 
 
+</div> -->
+
+<div>
+    <form [formGroup]="this.form">
+        <div>{{ this.form | json }}</div>
+    </form>
 </div>

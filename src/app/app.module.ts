@@ -12,8 +12,9 @@ import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 
 // ngrx
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from './app.reducer';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { EffectsModule } from '@ngrx/effects';
+import { appReducers } from './app.reducer';
 
 // components
 import { AppComponent } from './app.component';
@@ -27,6 +28,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 
 import { environment } from '../environments/environment';
+import { effectComponents } from './components/components.effects';
 
 @NgModule({
   entryComponents: [
@@ -54,6 +56,7 @@ import { environment } from '../environments/environment';
     ReactiveFormsModule,
     FormsModule,
     NgxDaterangepickerMd.forRoot(),
+    EffectsModule.forRoot( effectComponents ),
     StoreModule.forRoot( appReducers ),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

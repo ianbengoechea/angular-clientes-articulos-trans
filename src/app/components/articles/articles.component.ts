@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+// tslint:disable: no-unused-expression
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 // material components
 import {MatTableDataSource} from '@angular/material/table';
@@ -10,6 +12,13 @@ import { ArticlesService } from '../../providers/articles/articles.service';
 // components
 import { ArticlesModalComponent } from './articles-modal.component';
 import Swal from 'sweetalert2';
+
+// ngrx
+import { AppState } from 'src/app/app.reducer';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
+import { ArticuloGetAllAction, ArticuloGetOneAction, ArticuloModeViewAction, ArticuloUpdateAction, ArticuloAddAction } from './article.actions';
+import { map } from 'rxjs/operators';
 
 export interface Categoria {
   categoria: {
@@ -31,99 +40,82 @@ export interface Article extends Categoria {
   templateUrl: './articles.component.html',
   styleUrls: ['./articles.component.css']
 })
-export class ArticlesComponent implements OnInit {
+export class ArticlesComponent implements OnInit, OnDestroy {
 
   displayedColumns: string[] = ['id_articulos', 'nombre', 'precio_unitario', 'categoria', 'opciones'];
   dataSource: any = [];
+  subscriptionArticleList: Subscription;
 
   constructor(
               private articlesService: ArticlesService,
-              public dialog: MatDialog ) { }
+              public dialog: MatDialog,
+              private store: Store<AppState>
+              ) {}
 
   ngOnInit() {
 
-    this.articlesService.getAllArticles()
-        .subscribe( (articulos: Article[]) => {
-          console.log(articulos)
-          this.dataSource = new MatTableDataSource(articulos);
-          console.log('this.dataSource', this.dataSource);
+    this.articlesService.loadArticles()
+        .subscribe( (ArticlesArray: Article[]) => {
+          this.store.dispatch( new ArticuloGetAllAction(ArticlesArray) );
         });
 
+    this.subscriptionArticleList = this.store.select('articles')
+        .subscribe( (ArticlesStore) => this.dataSource = new MatTableDataSource(ArticlesStore.articulos) );
+
   }
+
+  ngOnDestroy() {
+    this.subscriptionArticleList.unsubscribe();
+  }
+
 
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  // TODO: Hacer el open del modal en una sola funcion
-  // TODO: Ver como establecer la data por defecto sin enviarla por aca
-  articleNew(): void {
-    const dialogRef = this.dialog.open(ArticlesModalComponent, {
-      width: 'auto',
-      data: {
-        isView: false,
-        id_articulos: '',
-        cantidad: '',
-        descripcion: '',
-        nombre: '',
-        precio_unitario: '',
-        categoria: {
-          id_categoria: '',
-          nombre: ''
-        }
-      }
-    });
+  loadArticulo( id: number, type?: string ) {
+    console.log('entre a loadArticulo, id', id, 'mi tipo es: ', type);
+      // BUSCA EL ARTICULO POR ID, LO ALMACENA EN EL STORE Y LO ENVIA AL MODAL
+    this.articlesService.loadArticle(id).pipe(map( (items: any[]) => {
+
+      items.forEach( i => {
+        if (i.id_articulos === id) {
+          this.store.dispatch( new ArticuloGetOneAction(i) );
+        } else { return; }
+      });
+      return;
+    })).subscribe();
+
+    // si selecciona ver, se envia una accion que carga solo la vista, sino carga el formulario normal
+    if ( type === 'VIEW') {
+      this.store.dispatch( new ArticuloModeViewAction(true) );
+    } else {
+      this.store.dispatch( new ArticuloModeViewAction(false) );
+    }
+    // llama a la funcion para abrir el modal
+    this.editOrViewModal();
+  }
+
+  editOrViewModal() {
+
+    const dialogRef = this.dialog.open(ArticlesModalComponent, { width: 'auto' });
     dialogRef.afterClosed().subscribe( (result: Article) => {
-      console.log('[ARTICLE-COMPONENT] >> articleNew', result);
+
       if (!!result) {
-        this.articlesService.createArticle( result )
-              .subscribe( () => {
-                this.articlesService.getAllArticles()
-                    .subscribe( (article: Article[]) => this.dataSource = new MatTableDataSource(article));
-              });
-            }
+          this.store.dispatch( new ArticuloUpdateAction(result, result.id_articulos) );
+      }
     });
   }
 
-  articleEdit(object): void {
-    const dialogRef = this.dialog.open(ArticlesModalComponent, {
-      width: 'auto',
-      data: {
-        isView: false,
-        id_articulos: object.id_articulos,
-        cantidad: object.cantidad,
-        descripcion: object.descripcion,
-        nombre: object.nombre,
-        precio_unitario: object.precio_unitario,
-        categoria: {
-          id_categoria: object.categoria.id_categoria,
-          nombre: object.categoria.nombre
-        }
-      }
-    });
+
+  // TODO: Hacer el open del modal en una sola funcion
+  // TODO: Ver como establecer la data por defecto sin enviarla por aca
+  articleNew(): void {
+    this.store.dispatch( new ArticuloModeViewAction(false) );
+    const dialogRef = this.dialog.open(ArticlesModalComponent, { width: 'auto' });
+
     dialogRef.afterClosed().subscribe( (result: Article) => {
-      console.log('[ARTICLE-COMPONENT] >> articleEdit', result);
-
-      if (!!result) {
-      this.articlesService.editArticle( result )
-            .subscribe( (response: any) => {
-              console.log(response);
-            });
-          }
-      // ACTUALIZA LA INFORMACION SIN IR AL SERVIDOR (PARA QUE SEA MAS RAPIDO) VER COMO IMPLEMENTAR, O HACER EL GET NUEVAMENTE
-      if (!result) {
-        return;
-      }
-      const id = result.id_articulos;
-      const p = this.dataSource._data._value.findIndex( item => item.id_articulos === id);
-
-
-      this.dataSource._data._value[p].nombre = result.nombre;
-      this.dataSource._data._value[p].descripcion = result.descripcion;
-      this.dataSource._data._value[p].cantidad = result.cantidad;
-      this.dataSource._data._value[p].precio_unitario = result.precio_unitario;
-      this.dataSource._data._value[p].categoria.categoria = result.categoria.id_categoria;
-      this.dataSource._data._value[p].categoria.nombre = result.categoria.nombre;
+      !!result ? this.store.dispatch( new ArticuloAddAction(result) ) : null;
     });
   }
 
@@ -144,13 +136,13 @@ export class ArticlesComponent implements OnInit {
         if (result.value) {
           this.articlesService.deleteArticle( id )
         .subscribe( () => {
-          this.articlesService.getAllArticles()
+          this.articlesService.loadArticles()
               .subscribe( (articulo: Article[]) => this.dataSource = new MatTableDataSource(articulo));
           Swal.fire(
                 'Eliminado!',
                 'El articulo ha sido eliminado.',
                 'success'
-              )
+              );
         }, (error) => {
               if (error.error.message.includes('existe') ) {
                 return Swal.fire(

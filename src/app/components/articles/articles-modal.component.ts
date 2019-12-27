@@ -1,99 +1,126 @@
-  // tslint:disable: no-string-literal
-import { Component, OnInit, Inject } from '@angular/core';
-
-
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-
+// tslint:disable: no-string-literal
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { debounceTime, take, map } from 'rxjs/operators';
+// ngrx
+import { Store, select } from '@ngrx/store';
+import { AppState } from 'src/app/app.reducer';
+import { Observable } from 'rxjs';
+import { CategoriaGetAllAction, ArticuloResetAction } from './article.actions';
+// selectors
+import { selectArticleCategorias, selectArticleModeView, selectArticleArticulo } from './article.selectors';
 // form
-import {
-  FormControl,
-  FormGroup,
-  FormGroupDirective,
-  NgForm,
-  Validators,} from '@angular/forms';
-
+import {Validators, FormBuilder } from '@angular/forms';
 // custom errror handler
 import { ErrorStateMatcher } from '@angular/material/core';
-
-// components
-import { Article } from './articles.component';
-import { ClientsService } from '../../providers/clients/clients.service';
+// interfaces,
+import { Article, Categoria } from './articles.component';
 import { ArticlesService } from '../../providers/articles/articles.service';
 
-
-// @TODO - create new class error handler
-/** Error when invalid control is dirty, touched, or submitted. */
-export class MyErrorStateMatcher implements ErrorStateMatcher {
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    const isSubmitted = form && form.submitted;
-    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
-  }
+export interface Form {
+  id_articulos: number;
+  cantidad: number;
+  descripcion: string;
+  nombre: string;
+  precio_unitario: number;
+  categoria: {
+    id_categoria: number,
+    nombre: string,
+  };
 }
-
 
 @Component({
   selector: 'app-articles-modal',
   templateUrl: './articles-modal.component.html',
   styleUrls: ['./articles-modal.component.css']
 })
-export class ArticlesModalComponent implements OnInit {
+export class ArticlesModalComponent implements OnInit, OnDestroy {
 
-  listaCategoria = [];
-  id_categoria = new FormControl({ value: this.data.categoria.id_categoria, disabled: this.data['isView'] });
-  nombre = new FormControl({ value: this.data.categoria.id_categoria, disabled: this.data['isView'] });
-  viewMode = this.data['isView'];
+  formValueChanges$: Observable<Form>;
+  listaCategoria$: Observable<Categoria[]> = this.store.select(selectArticleCategorias);
+  modeView$: Observable<boolean> = this.store.select(selectArticleModeView);
 
-  form = new FormGroup({
-    cantidad: new FormControl({ value: this.data['cantidad'], disabled: this.data['isView'] }, Validators.required),
-    descripcion: new FormControl({ value: this.data['descripcion'], disabled: this.data['isView']}, Validators.required),
-    nombre: new FormControl({ value: this.data['nombre'], disabled: this.data['isView']}, Validators.required),
-    precio_unitario: new FormControl({ value: this.data['precio_unitario'], disabled: this.data['isView']}, Validators.required),
-    categoria: new FormGroup({
-      id_categoria: this.id_categoria,
-      nombre: this.nombre,
+  // id_categoria = new FormControl({ value: this.data.categoria.id_categoria, disabled: this.data['isView'] });
+  // nombre = new FormControl({ value: this.data.categoria.id_categoria, disabled: this.data['isView'] });
+  // viewMode = this.data['isView'];
+
+  form = this.fb.group({
+    id_articulos: [''],
+    cantidad: ['', [Validators.required]],
+    descripcion: ['', [Validators.required]],
+    nombre: ['', [Validators.required]],
+    precio_unitario: ['', [Validators.required]],
+    categoria: this.fb.group({
+      id_categoria: ['', [Validators.required]],
+      nombre: ['', [Validators.required]],
     })
   });
 
-  get formNombre() {
-    return this.form.get('nombre');
-  }
-  get formIdCategoria() {
-    return this.form.get('categoria.id_categoria');
-  }
-
-  matcher = new MyErrorStateMatcher();
-
   constructor(
+              private fb: FormBuilder,
+              private store: Store<AppState>,
               private articlesService: ArticlesService,
               public dialogRef: MatDialogRef<ArticlesModalComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: Article) {
-
-                console.log(' data en el dialog component', data);
-              }
+              ) {}
 
   ngOnInit() {
 
-    // TODO: Traer las categorias aca
+  this.articlesService.loadCategories()
+      .subscribe( (ArrayCategorias: Categoria[]) => {
+        this.store.dispatch( new CategoriaGetAllAction(ArrayCategorias) );
+      });
 
-    this.articlesService.getAllCategories()
-        .subscribe( (categoria: any) => {
-          console.log('[modal-component] categoria >>>', categoria);
-          this.listaCategoria = categoria;
-        });
-  }
+  this.formValueChanges$ = this.form.valueChanges.pipe(
+        debounceTime(500)
+      );
 
-  guardarCambios() {
-    const id = this.data.id_articulos;
-    this.form.value.id_articulos = id;
-
-    const idCategoriaNew = this.formIdCategoria.value;
-    this.listaCategoria.filter( item => {
-      if (item.id_categoria === idCategoriaNew) {
-        this.form.value.categoria.nombre = item.nombre;
+  this.store
+    .pipe( select(selectArticleArticulo), take(5) )
+    .subscribe(form => {
+      if (!form ) {
+        return;
+      } else {
+        this.form.patchValue({...form});
       }
     });
 
-    this.dialogRef.close(this.form.value);
+  this.modeView$.subscribe( (value: boolean) => {
+    if (value) {
+      this.form.disable();
+    } else {
+      return;
+    }
+  });
+
+  }
+
+
+  ngOnDestroy() {
+    // para evitar una fuga de memoria, me desuscribo a los observables? cuando? como?
+    this.store.dispatch( new ArticuloResetAction() );
+    console.log('MODAL, ME DESTRUÍ');
+  }
+
+  guardarCambios() {
+
+
+    // busca el nombre de la categoria
+    const categoriaNombre = this.form.get(['categoria', 'nombre']).value;
+    // busca el id de la empresa seleccionada
+    this.listaCategoria$.pipe( map( (categoria: Categoria[]) => {
+      categoria.find( (item: Categoria) => {
+        if ( item['nombre'] === categoriaNombre ) {
+          return this.form.value.categoria.id_categoria = item['id_categoria'];
+        } else { return; }
+      });
+    })).subscribe();
+
+    // cierra el modal y envia el formulario si es valido
+    // TODO cambiar esa validacion de id_cliente nulo
+    if (this.form.valid || this.form.get('id_articulos').value === '' ) {
+      this.dialogRef.close(this.form.value);
+    }
+
   }
 
   onNoClick(): void {

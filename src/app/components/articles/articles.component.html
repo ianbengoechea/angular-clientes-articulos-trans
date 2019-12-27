@@ -47,10 +47,10 @@
                 <button mat-icon-button (click)="articleDelete(element['id_articulos'])">
                         <mat-icon>delete</mat-icon>
                     </button>
-                <button mat-icon-button (click)="articleEdit(element)">
+                <button mat-icon-button (click)="loadArticulo(element['id_articulos'])">
                         <mat-icon>edit</mat-icon>
                     </button>
-                <button mat-icon-button (click)="articleView(element)">
+                <button mat-icon-button (click)="loadArticulo(element['id_articulos'], 'VIEW')">
                             <mat-icon>remove_red_eye</mat-icon>
                         </button>
             </td>

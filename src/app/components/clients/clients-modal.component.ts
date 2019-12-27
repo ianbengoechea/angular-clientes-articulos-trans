@@ -1,5 +1,5 @@
   // tslint:disable: no-string-literal
-import { Component, OnInit, Inject, Input } from '@angular/core';
+import { Component, OnInit, Inject, Input, OnDestroy } from '@angular/core';
 
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
@@ -10,7 +10,7 @@ import {
   FormGroup,
   FormGroupDirective,
   NgForm,
-  Validators, 
+  Validators,
   FormArray} from '@angular/forms';
 
 // custom errror handler
@@ -20,14 +20,26 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { Cliente, Empresa } from './clients.component';
 import { ClientsService } from '../../providers/clients/clients.service';
 
+// redux
+import { Store, select } from '@ngrx/store';
+import { AppState } from 'src/app/app.reducer';
+import { Subscription, Observable } from 'rxjs';
+import { debounceTime, filter, take, map, mergeMap, switchMap } from 'rxjs/operators';
+import { selectClientsClient, selectClientsEmpresas, selectClientsModeView } from './clients.selectors';
+import { EmpresaGetAllAction, ClientResetAction } from './clients.actions';
 
-// @TODO - create new class error handler
-/** Error when invalid control is dirty, touched, or submitted. */
-export class MyErrorStateMatcher implements ErrorStateMatcher {
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    const isSubmitted = form && form.submitted;
-    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
-  }
+
+export interface Form {
+  id_cliente: number;
+  firstname: string;
+  lastname: string;
+  country: string;
+  telephone: string;
+  email: string;
+  empresa: {
+      id_empresa: number,
+      nombre: string,
+  };
 }
 
 @Component({
@@ -35,63 +47,91 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
   templateUrl: './clients-modal.component.html',
   styleUrls: ['./clients-modal.component.css']
 })
-export class ClientsModalComponent implements OnInit {
+export class ClientsModalComponent implements OnInit, OnDestroy {
 
-  listaEmpresas = [];
-  id_empresa = new FormControl({ value: this.data.empresa.id_empresa, disabled: this.data['isView'] });
-  nombre = new FormControl({ value: this.data.empresa.id_empresa, disabled: this.data['isView'] });
-  viewMode = this.data['isView'];
+    formValueChanges$: Observable<Form>;
+  listaEmpresas$: Observable<Empresa[]> = this.store.select(selectClientsEmpresas);
+  modeView$: Observable<boolean> = this.store.select(selectClientsModeView);
 
-  form = new FormGroup({
-    firstname: new FormControl({ value: this.data['firstname'], disabled: this.data['isView'] }, Validators.required),
-    lastname: new FormControl({ value: this.data['lastname'], disabled: this.data['isView']}, Validators.required),
-    country: new FormControl({ value: this.data['country'], disabled: this.data['isView']}, Validators.required),
-    telephone: new FormControl({ value: this.data['telephone'], disabled: this.data['isView']}, Validators.required),
-    email:  new FormControl({ value: this.data['email'], disabled: this.data['isView']}, [ Validators.required, Validators.email]),
-    empresa: new FormGroup({
-        id_empresa: this.id_empresa,
-        nombre: this.nombre,
+
+  form = this.fb.group({
+    id_cliente: [''],
+    firstname: ['', [Validators.required]],
+    lastname: ['', [Validators.required]],
+    country: ['', [Validators.required]],
+    telephone: ['', [Validators.required]],
+    email:  ['', [Validators.required]],
+    empresa: this.fb.group({
+        id_empresa: ['', [Validators.required]],
+        nombre: ['', [Validators.required]],
     })
   });
 
-  get user() {
-    return this.form.get('firstname');
-  }
-  get idEmpresa() {
-    return this.form.get('empresa.id_empresa');
-  }
-
-  matcher = new MyErrorStateMatcher();
-
   constructor(
+              private fb: FormBuilder,
+              private store: Store<AppState>,
               private clientesService: ClientsService,
               public dialogRef: MatDialogRef<ClientsModalComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: Cliente) {
-
-                console.log(' data en el dialog component', data);
-              }
+              ) {}
 
   ngOnInit() {
 
-    this.clientesService.getAllEmpresa()
-        .subscribe( (empresa: any) => {
-          console.log('[modal-component] empresa >>>', empresa);
-          this.listaEmpresas = empresa;
-        });
-  }
+    this.clientesService.loadEmpresas()
+              .subscribe( (arrayEmpresas: Empresa[]) => {
+                this.store.dispatch( new EmpresaGetAllAction(arrayEmpresas) );
+              });
 
-  guardarCambios() {
-    const id = this.data.id_cliente;
-    this.form.value.id_cliente = id;
+    this.formValueChanges$ = this.form.valueChanges.pipe(
+      debounceTime(500)
+    );
 
-    const idEmpresaNew = this.idEmpresa.value;
-    this.listaEmpresas.filter( item => {
-      if (item.id_empresa === idEmpresaNew) {
-        this.form.value.empresa.nombre = item.nombre;
+    this.store
+      .pipe( select(selectClientsClient), take(5) )
+      .subscribe(form => {
+        if (!form ) {
+          return;
+        } else {
+          this.form.patchValue({...form});
+        }
+      });
+
+    this.modeView$.subscribe( (value: boolean) => {
+      if (value) {
+        this.form.disable();
+      } else {
+        return;
       }
     });
 
-    this.dialogRef.close(this.form.value);
+  }
+
+  ngOnDestroy() {
+    // para evitar una fuga de memoria, me desuscribo a los observables? cuando? como?
+    console.log('MODAL, ME DESTRUÍ')
+    this.store.dispatch( new ClientResetAction() );
+
+  }
+
+  guardarCambios() {
+
+
+    // busca el nombre de la empresa
+    const empresaNombre = this.form.get(['empresa', 'nombre']).value;
+    // busca el id de la empresa seleccionada
+    this.listaEmpresas$.pipe( map( (empresa: Empresa[]) => {
+      empresa.find( (item: Empresa) => {
+        if ( item['nombre'] === empresaNombre ) {
+          return this.form.value.empresa.id_empresa = item['id_empresa'];
+        } else { return; }
+      });
+    })).subscribe();
+
+    // cierra el modal y envia el formulario si es valido
+    // TODO cambiar esa validacion de id_cliente nulo
+    if (this.form.valid || this.form.get('id_cliente').value === '' ) {
+      this.dialogRef.close(this.form.value);
+    }
+
   }
 
   onNoClick(): void {

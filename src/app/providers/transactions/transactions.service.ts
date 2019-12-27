@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/app.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +13,10 @@ export class TransactionsService {
   private httpHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
 
-  constructor(private http: HttpClient) { }
+  constructor(
+              private http: HttpClient) { }
 
-  getAllTransaction() {
+  loadReportes() {
     return this.http.get(`${ this.SERVER }/ventas`);
   }
   getFilterTransaction(startDate, endDate) {

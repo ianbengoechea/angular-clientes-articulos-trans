@@ -1,4 +1,4 @@
-<ng-container *ngIf="!this.data.id_articulos && !viewMode; else editar">
+<!-- <ng-container *ngIf="!this.data.id_articulos && !viewMode; else editar">
     <h2 mat-dialog-title>NUEVO ARTICULO</h2>
     <br>
 </ng-container>
@@ -13,10 +13,10 @@
 <ng-template #ver>
     <h2 mat-dialog-title>ARTICULO</h2>
     <br>
-</ng-template>
+</ng-template> -->
 
 <mat-dialog-content>
-    <form class="example-form" [formGroup]="form">
+    <form class="example-form" [formGroup]="this.form">
 
         <table cellspacing="20">
             <tr>
@@ -41,11 +41,15 @@
                 </td>
                 <td>
                     <mat-label>Categoria</mat-label>
-                    <mat-select formGroupName="categoria" [formControl]="id_categoria" [(value)]="this.data.categoria['id_categoria']">
-                        <mat-option *ngFor="let categoria of listaCategoria" [value]="categoria.id_categoria">
-                            {{categoria.nombre}}
-                        </mat-option>
-                    </mat-select>
+                    <div formGroupName="categoria">
+
+                        <mat-select formControlName="nombre">
+                            <mat-option *ngFor="let categoria of listaCategoria$ | async" [value]="categoria['nombre']">
+                                {{ categoria['nombre'] }}
+                            </mat-option>
+                        </mat-select>
+
+                    </div>
                 </td>
             </tr>
 
@@ -60,7 +64,7 @@
 
         <div class="footer-div-modal">
             <button (click)="onNoClick()" class="btn-margin" mat-raised-button color="primary">CANCELAR</button>
-            <button *ngIf="!viewMode" (click)="guardarCambios()" class="btn-margin" mat-raised-button color="primary">ACEPTAR</button>
+            <button *ngIf="!(this.modeView$ | async)" (click)="guardarCambios()" class="btn-margin" mat-raised-button color="primary">ACEPTAR</button>
         </div>
 
     </form>
