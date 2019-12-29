@@ -46,7 +46,7 @@
         <ng-container matColumnDef="opciones">
             <th mat-header-cell *matHeaderCellDef> Opciones </th>
             <td mat-cell *matCellDef="let element">
-                <button mat-icon-button (click)="transactionView(element)">
+                <button mat-icon-button (click)="transactionView(element['id_ventas'], 'VIEW')">
                         <mat-icon>remove_red_eye</mat-icon>
                     </button>
             </td>

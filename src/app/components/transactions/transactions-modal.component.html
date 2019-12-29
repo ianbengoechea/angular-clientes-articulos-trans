@@ -1,9 +1,12 @@
-<!-- <div class="main-container">
-    <form [formGroup]="ventasForm">
+<div class="main-container">
+    <form [formGroup]="this.form">
 
-        <mat-card-header>
-            <mat-card-title formControlName="empresa" ngDefaultControl matInput>Vedido a: {{ ventasForm.controls['empresa'].value }}</mat-card-title>
-        </mat-card-header>
+        <div formGroupName="cliente">
+            <mat-card-header formGroupName="empresa">
+                <mat-card-title formControlName="nombre" ngDefaultControl matInput>Vedido a: {{ this.form.controls['cliente'].controls['empresa'].controls['nombre'].value }}</mat-card-title>
+            </mat-card-header>
+        </div>
+
 
         <p class="form-fields">
             <mat-form-field>
@@ -14,7 +17,7 @@
 
         <ng-container formArrayName="ventas_items">
 
-            <div *ngFor="let ventas of ventasForm.controls['ventas_items'].controls; let i = index" #enElFor [formGroupName]="i">
+            <div *ngFor="let ventas of this.form.controls['ventas_items'].controls; let i = index" #enElFor [formGroupName]="i">
                 <p class="form-fields" formGroupName="articulo" type="text">
                     <mat-form-field>
                         <mat-label>Precio unitario:</mat-label>
@@ -39,13 +42,11 @@
 
         </ng-container>
 
+        <div class="footer-div-modal">
+            <button (click)="onNoClick()" class="btn-margin" mat-raised-button color="primary">CANCELAR</button>
+        </div>
+
     </form>
 
 
-</div> -->
-
-<div>
-    <form [formGroup]="this.form">
-        <div>{{ this.form | json }}</div>
-    </form>
 </div>

@@ -17,7 +17,7 @@ import { Moment } from 'moment';
 // NGRX
 import { AppState } from '../../app.reducer';
 import { Store } from '@ngrx/store';
-import { TransactionsGetAllAction } from './store/actions/transactions.actions';
+import { TransactionsGetAllAction, TransactionsGetAction, TransactionsModeViewAction } from './store/actions/transactions.actions';
 import { mergeMap, tap, switchMap, map } from 'rxjs/operators';
 
 
@@ -102,19 +102,22 @@ export class TransactionsComponent implements OnInit, OnDestroy {
         ).subscribe();
   }
 
-  transactionView(object: Reporte): void {
-    const dialogRef = this.dialog.open(TransactionsModalComponent, {
-      width: 'auto',
-      // data: {
-      //   isView: true,
-      //   nombre: object['cliente'].empresa.nombre,
-      //   telephone: object['cliente'].telephone,
-      //   email: object['cliente'].email,
-      //   ventas_items: object['ventas_items'],
-      //   fecha_venta: object.fecha_venta,
-      //   comentario: object.comentarios,
-      // }
-    });
+  transactionView(id: number, type?: string): void {
+    this.transactionService.loadReporte(id).pipe(map( (items: any[]) => {
+
+      items.forEach( i => {
+        if (i.id_ventas === id) {
+          this.store.dispatch( new TransactionsGetAction(i) );
+        } else { return; }
+      });
+      return;
+    })).subscribe();
+
+    if ( type === 'VIEW') {
+      this.store.dispatch( new TransactionsModeViewAction(true) );
+    }
+
+    const dialogRef = this.dialog.open(TransactionsModalComponent, { width: 'auto' });
   }
 
   onChangeDate(event) {

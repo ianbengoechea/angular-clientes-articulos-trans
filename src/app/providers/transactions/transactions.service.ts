@@ -19,6 +19,13 @@ export class TransactionsService {
   loadReportes() {
     return this.http.get(`${ this.SERVER }/ventas`);
   }
+
+  loadReporte( id: number ) {
+    return this.http.get(`${ this.SERVER }/ventas`);
+  }
+
+
+
   getFilterTransaction(startDate, endDate) {
     return this.http.get(`${ this.SERVER }/ventas/filtro?from=${startDate}&to=${endDate}`);
   }

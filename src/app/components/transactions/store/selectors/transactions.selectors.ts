@@ -18,3 +18,9 @@ export const selectReportsReporteList = createSelector(
   (state: ReporteState) => state.reporteList
 );
 
+export const selectReportsModeView = createSelector(
+  selectReporte,
+  (state: ReporteState) => state.mode_view
+);
+
+

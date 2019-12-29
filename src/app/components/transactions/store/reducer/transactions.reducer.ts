@@ -5,6 +5,7 @@ export interface ReporteState {
 
   reporteList: Reporte[];
   reporte: Reporte;
+  mode_view: boolean;
 
 }
 
@@ -12,6 +13,7 @@ const initialState: ReporteState = {
 
   reporteList: [],
   reporte: null,
+  mode_view: null
 
 };
 
@@ -25,6 +27,8 @@ export const reporteReducer: (
         return { ...state, reporteList: action.payload  };
     case TransactionActions.ACT_GET_TRANSACTION:
         return { ...state, reporte: action.payload  };
+    case TransactionActions.ACT_MODE_VIEW:
+        return { ...state, mode_view: action.payload  };
 
     default:
         return state;
