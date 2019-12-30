@@ -127,7 +127,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
 
     if (!!id) {
       Swal.fire({
-        title: 'Quieres eliminar el articulo?',
+        title: 'Quieres eliminar el cliente?',
         text: 'No se puede revertir esta accion',
         icon: 'warning',
         showCancelButton: true,
