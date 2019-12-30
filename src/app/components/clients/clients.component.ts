@@ -16,6 +16,7 @@ import { Store } from '@ngrx/store';
 import { Subscription, Observable } from 'rxjs';
 import { ClientGetAllAction, ClientGetAction, ClientUpdateAction, ClientModeView, ClientAddAction } from './clients.actions';
 import { map } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 export interface Empresa {
   empresa?: {
@@ -122,61 +123,48 @@ export class ClientsComponent implements OnInit, OnDestroy {
     });
   }
 
-  //   clientEdit(id: number): void {
-
-  //     // BUSCA EL CLIENTE POR ID, LO ALMACENA EN EL STORE Y LO ENVIA AL MODAL
-  //   this.clientesService.loadCliente(id).pipe(map( (items: any[]) => {
-  //     // console.log('[client-component] >> loadCliente >> id >>>', id)
-  //     items.forEach( i => {
-  //       if (i.id_cliente === id) {
-  //         this.store.dispatch( new ClientGetAction( i ) );
-  //       } else { return; }
-  //     });
-  //     return;
-  //   })).subscribe();
-
-
-  //   const dialogRef = this.dialog.open(ClientsModalComponent, {
-  //     width: 'auto',
-  //   });
-
-  //   dialogRef.afterClosed().subscribe( (result: Cliente) => {
-  //     console.log('[CLIENT COMPONENT] >> clientEdit', result);
-
-  //     if (!!result) {
-  //         this.store.dispatch( new ClientUpdateAction(result, result.id_cliente) );
-  //     }
-  //   });
-  // }
-
   clientDelete(id: number) {
 
     if (!!id) {
-      this.clientesService.deteleClient( id );
-            // .subscribe( () => {
-            //   this.clientesService.getAllClients()
-            //       .subscribe( (clientes: Cliente[]) => this.dataSource = new MatTableDataSource(clientes));
-            // });
+      Swal.fire({
+        title: 'Quieres eliminar el articulo?',
+        text: 'No se puede revertir esta accion',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Si, eliminalo!',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        console.log('result.value', result.value);
+        if (result.value) {
+          this.clientesService.deteleClient( id ).subscribe(
+            () => {
+              this.clientesService
+              .loadClientes()
+              .subscribe(
+                (clientes: Cliente[]) =>
+                  this.dataSource = new MatTableDataSource(clientes));
+              Swal.fire(
+                  'Eliminado!',
+                  'El cliente ha sido eliminado.',
+                  'success'
+                  );
+            },
+            error => {
+              if (error.error.message.includes('existe')) {
+                return Swal.fire(
+                  'Error!',
+                  'No se puede eliminar el cliente',
+                  'error'
+                );
+              }
+            }
+          );
+        } else { return; }
+      });
     }
   }
 
-  // clientView(object): void {
-  //   const dialogRef = this.dialog.open(ClientsModalComponent, {
-  //     width: 'auto',
-  //     data: {
-  //       isView: true,
-  //       id_cliente: null,
-  //       firstname: object.firstname,
-  //       lastname: object.lastname,
-  //       email: object.email,
-  //       country: object.country,
-  //       telephone: object.telephone,
-  //       empresa: {
-  //         id_empresa: object.empresa.id_empresa,
-  //         nombre: object.empresa.nombre
-  //       }
-  //     }
-  //   });
-  // }
 
 }
